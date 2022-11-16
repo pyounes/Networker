@@ -1,5 +1,5 @@
 //
-//  Logger.swift
+//  NWLogger.swift
 //  
 //
 //  Created by Pierre Younes on 15/11/2022.
@@ -7,12 +7,12 @@
 
 import Foundation
 
-public protocol Logger {
+public protocol NWLogger {
   func log(title: String, _ description: String)
 }
 
 
-private extension Logger {
+public extension NWLogger {
   func log(title: String, _ description: String) {
 #if DEBUG
     print("""
