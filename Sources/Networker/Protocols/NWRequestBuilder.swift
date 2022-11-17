@@ -10,9 +10,7 @@ import Foundation
 public protocol NWRequestBuilder {
   var baseURL               : URL                     { get }
   var path                  : String                  { get }
-  var urlWithPath           : URL                     { get }
   var httpMethod            : NWMethod                { get }
-  var urlRequest            : URLRequest              { get }
   var headers               : [String: String]?       { get }
   var query                 : [String: String]?       { get }
   var parameters            : [String: Any]?          { get }
@@ -23,8 +21,13 @@ public protocol NWRequestBuilder {
   var acceptableStatusCodes : ClosedRange<Int>        { get }
 }
 
+protocol NWRequestBuilderHelper: NWRequestBuilder {
+  var urlWithPath           : URL                     { get }
+  var urlRequest            : URLRequest              { get }
+}
 
-extension NWRequestBuilder {
+
+extension NWRequestBuilderHelper {
   
   var acceptableStatusCodes: ClosedRange<Int> { 200...299 }
   
