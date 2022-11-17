@@ -12,7 +12,7 @@ public protocol NWRequestBuilder {
   var path                  : String                  { get }
   var httpMethod            : NWMethod                { get }
   var headers               : [String: String]?       { get }
-  var query                 : [String: String]?       { get }
+  var query                 : [String: String?]?      { get }
   var parameters            : [String: Any]?          { get }
   var withToken             : Bool                    { get }
   var token                 : String                  { get }
@@ -36,7 +36,7 @@ extension NWRequestBuilderHelper {
     let requestURL =  baseURL.appendingPathComponent(path, isDirectory: false)
     
     guard
-      let queryItems = query?.map({ URLQueryItem(name: $0, value: $1) }),
+        let queryItems = query?.map({ URLQueryItem(name: $0, value: $1) }).compactMap({ $0 }),
       !queryItems.isEmpty,
       var urlComponents = URLComponents(url: requestURL, resolvingAgainstBaseURL: true)
     else {
