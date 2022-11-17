@@ -40,21 +40,21 @@ enum TermsAPI: NWRequest {
 //    ["testing":"parameters"]
 //  }
   
-  var withToken: Bool {
-    false
-  }
+//  var withToken: Bool {
+//    false
+//  }
   
-  var token: String {
-    "TESTING_TOKEN-123ouiwkdsjv"
-  }
-  
-  var acceptableStatusCodes: ClosedRange<Int> {
-    return 200...299
-  }
-  
-  var httpMethod: NWMethod {
-    .get
-  }
+//  var token: String {
+//    "TESTING_TOKEN-123ouiwkdsjv"
+//  }
+
+//  var acceptableStatusCodes: ClosedRange<Int> {
+//    return 200...299
+//  }
+
+//  var httpMethod: NWMethod {
+//    .get
+//  }
   
 }
 
@@ -78,7 +78,7 @@ final class NetworkerTests: XCTestCase {
       exp.fulfill()
     }
     
-    wait(for: [exp], timeout: 2.0)
+    wait(for: [exp], timeout: 1.0)
 
   }
   
