@@ -31,18 +31,6 @@ public final class Networker {
       activityIndicator.addLoader()
     }
     
-    if let url = nwRequest.urlRequest.url?.absoluteString {
-      logger.log(title: "URL", url)
-    }
-    
-    if let headers = nwRequest.urlRequest.allHTTPHeaderFields?.description {
-      logger.log(title: "HEADERS",  headers)
-    }
-    
-    if let body = nwRequest.urlRequest.httpBody {
-      logger.log(title: "BODY", body.prettyJson)
-    }
-    
     // Staring Session Execution // - TODO: should check if [weak self] should be used here
     let task = session.urlSession.dataTask(with: nwRequest.urlRequest) { data, urlResponse, error in
       
@@ -70,6 +58,18 @@ public final class Networker {
     error: Error?,
     completion: @escaping (Swift.Result<Response, Error>) -> Void
   ) {
+    
+    if let url = request.urlRequest.url?.absoluteString {
+      logger.log(title: "URL", url)
+    }
+    
+    if let headers = request.urlRequest.allHTTPHeaderFields?.description {
+      logger.log(title: "HEADERS",  headers)
+    }
+    
+    if let body = request.urlRequest.httpBody {
+      logger.log(title: "BODY", body.prettyJson)
+    }
     
     do {
       
