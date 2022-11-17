@@ -9,7 +9,7 @@ import Foundation
 
 extension DecodingError {
   
-  var errorDescription: String? {
+  var debugDescription: String {
     switch self {
     case let .typeMismatch(type, context):
       return "-- Type '\(type)' \n-- Mismatch: \(context.debugDescription) \n-- CodingPath: \(context.codingPath)"
