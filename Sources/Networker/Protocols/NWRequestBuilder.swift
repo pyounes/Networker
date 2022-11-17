@@ -28,10 +28,6 @@ extension NWRequestBuilder {
   
   var acceptableStatusCodes: ClosedRange<Int> { 200...299 }
   
-  // Token -- Maybe to get it from Token Manager class if available or UserDefaults
-  var token: String {
-    return ""
-  }
   
   var urlWithPath: URL {
     let requestURL =  baseURL.appendingPathComponent(path, isDirectory: false)
