@@ -13,12 +13,7 @@ public protocol NWActivityIndicator {
 }
 
 
-extension NWActivityIndicator {
-  func addLoader() {
-    
-  }
-  
-  func removeLoader() {
-    
-  }
+public extension NWActivityIndicator {
+  func addLoader() { }
+  func removeLoader() { }
 }

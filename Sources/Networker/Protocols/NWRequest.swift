@@ -24,12 +24,12 @@ public protocol NWRequest {
 }
 
 
-extension NWRequest {
+public extension NWRequest {
   var acceptableStatusCodes: ClosedRange<Int> { 200...299 }
   var headers: [String: String]? { nil }
   var httpMethod: NWMethod { NWMethod.get }
   var query: [String: String?]? { nil }
   var parameters: [String: Any]? { nil }
   var withToken: Bool { false }
-  var token: String { "Undefined token computed property in NWRequestBuilder" }
+  var token: String { "Undefined token computed property in NWRequest" }
 }

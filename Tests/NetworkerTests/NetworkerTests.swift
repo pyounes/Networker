@@ -1,5 +1,5 @@
 import XCTest
-@testable import Networker
+import Networker
 
 struct Root: Decodable {
   let status: Bool
@@ -20,13 +20,9 @@ enum TermsAPI: NWRequest {
   
   case getTerms
   
-  var baseURL: URL {
-    return URL(string: "https://api-merchantapp.montypay.com")!
-  }
+  var baseURL: URL { URL(string: "https://api-merchantapp.montypay.com")! }
   
-  var path: String {
-    return "/merchant-app/termsAndConditions"
-  }
+  var path: String { "/merchant-app/termsAndConditions" }
   
 //  var headers: [String : String]? {
 //    ["testing":"headers"]
