@@ -19,7 +19,7 @@ final class NWRequestBuilder {
     let requestURL =  nwRequest.baseURL.appendingPathComponent(nwRequest.path, isDirectory: false)
     
     guard
-      let queryItems = nwRequest.query?.map({ URLQueryItem(name: $0, value: $1) }).compactMap({ $0 }),
+      let queryItems = nwRequest.query?.compactMapValues({ $0 }).map({ URLQueryItem(name: $0, value: $1) }),
       !queryItems.isEmpty,
       var urlComponents = URLComponents(url: requestURL, resolvingAgainstBaseURL: true)
     else {
@@ -44,6 +44,7 @@ final class NWRequestBuilder {
     
     // adding general default Headers
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    request.setValue("application/json", forHTTPHeaderField: "Accept")
     
     // adding default endpointHeader
     nwRequest.headers?.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
