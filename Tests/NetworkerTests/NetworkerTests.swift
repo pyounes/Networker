@@ -29,7 +29,8 @@ enum TermsAPI: NWRequest {
 //  }
   
 //  var query: [String : String?]? {
-//    ["testing":"query"]
+//    ["testing": nil,
+//     "batata" : "batenjen"]
 //  }
   
 //  var parameters: [String : Any]?{
@@ -63,19 +64,34 @@ final class NetworkerTests: XCTestCase {
     // This is an example of a functional test case.
     // Use XCTAssert and related functions to verify your tests produce the correct
     // results.
-    
+
     let request = TermsAPI.getTerms
     let apiCaller = Networker(session: session(), logger: logger(), activityIndicator: activityIndicator())
-    
+
     let exp = expectation(description: "wait for call")
-    
+
     apiCaller.taskHandler(request: request, response: Root.self) { result in
 //      dump(result)
       exp.fulfill()
     }
-    
+
     wait(for: [exp], timeout: 1.0)
 
   }
+  
+  
+//  func testinQuery() {
+//
+//    let items: [String: String?]? = ["testing": nil, "batata" : "batenjen"]
+////    dump(items)
+//
+////    let query = items?.mapValues { URLQueryItem(name: $0.key, value: $0.value) }//.compactMap({ $0 })
+////    dump(query)
+//    let query = items?.compactMapValues { $0 }//.compactMap({ $0 })
+//    dump(query)
+//
+//    let output = query?.map { URLQueryItem(name: $0.key, value: $0.value) }
+//    dump(output)
+//  }
   
 }
