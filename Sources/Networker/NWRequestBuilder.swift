@@ -42,9 +42,9 @@ final class NWRequestBuilder {
     // adding respective HttpMethod
     request.httpMethod = nwRequest.httpMethod.type
     
-    // adding general default Headers
-    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    // adding general default Headers 
     request.setValue("application/json", forHTTPHeaderField: "Accept")
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     
     // adding default endpointHeader
     nwRequest.headers?.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
