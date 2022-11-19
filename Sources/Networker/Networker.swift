@@ -32,7 +32,7 @@ public final class Networker {
     }
     
     // Staring Session Execution // - TODO: should check if [weak self] should be used here
-    let task = session.urlSession.dataTask(with: nwRequest.urlRequest) { data, urlResponse, error in
+    let task = session.session.dataTask(with: nwRequest.urlRequest) { data, urlResponse, error in
       
       self.handleDataTaskResponse(request: nwRequest, response: response, urlResponse: urlResponse, data: data, error: error) { result in
         DispatchQueue.main.async {

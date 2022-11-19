@@ -11,7 +11,7 @@ import Foundation
 public protocol NWSessionConfiguration {
   
   // URLSession
-  var urlSession                : URLSession                { get }
+  var session                : URLSession                { get }
   
   // URLSession Configurations
   var urlSessionConfigurations  : URLSessionConfiguration   { get }
@@ -20,7 +20,7 @@ public protocol NWSessionConfiguration {
 
 public extension NWSessionConfiguration {
     
-  var urlSession: URLSession { URLSession(configuration: urlSessionConfigurations) }
+  var session: URLSession { URLSession(configuration: urlSessionConfigurations) }
   
   var urlSessionConfigurations: URLSessionConfiguration {
     let config = URLSessionConfiguration.ephemeral
