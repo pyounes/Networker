@@ -1,10 +1,10 @@
 import Foundation
 
-public final class Networker {
+public final class Networker: HTTPClient {
   
+  private let session: NWSessionConfiguration
   private let logger: NWLogger
   private let activityIndicator: NWActivityIndicator
-  private let session: NWSessionConfiguration
   
   public init(
     session: NWSessionConfiguration,
@@ -16,6 +16,33 @@ public final class Networker {
     self.session = session
   }
   
+  private struct UnexpectedValuesRepresentation: Error {}
+  
+  private struct URLSessionTaskWrapper: HTTPClientTask {
+    let wrapped: URLSessionTask
+
+    func cancel() {
+      wrapped.cancel()
+    }
+  }
+  
+  
+  public func get(from url: URL, completion: @escaping (HTTPClient.Result) -> Void) -> HTTPClientTask {
+    let task = session.session.dataTask(with: url) { data, response, error in
+      completion(Result {
+        if let error = error {
+          throw error
+        } else if let data = data, let response = response as? HTTPURLResponse {
+          return (data, response)
+        } else {
+          throw UnexpectedValuesRepresentation()
+        }
+      })
+    }
+    task.resume()
+    return URLSessionTaskWrapper(wrapped: task)
+  }
+  
   
   /// Without Parameters of type RequestParams
   public func taskHandler<Response: Decodable>(
@@ -23,7 +50,7 @@ public final class Networker {
     response: Response.Type,
     withLoader: Bool = false,
     completion: @escaping (Result<Response, Error>) -> Void
-  ) {
+  ) -> HTTPClientTask {
     
     let nwRequest = NWRequestBuilder(request: request)
     
@@ -46,6 +73,7 @@ public final class Networker {
     }
     
     task.resume()
+    return URLSessionTaskWrapper(wrapped: task)
   }
   
   
