@@ -2,18 +2,20 @@ import Foundation
 
 public final class Networker: HTTPClient {
   
-  private let session: NWSessionConfiguration
+  private let nwConfigurations: NWSessionConfiguration
   private let logger: NWLogger
   private let activityIndicator: NWActivityIndicator
   
+  private let reachabilityMonitor = NWMonitor.shared
+  
   public init(
-    session: NWSessionConfiguration,
+    configurations: NWSessionConfiguration,
     logger: NWLogger,
     activityIndicator: NWActivityIndicator
   ) {
     self.logger = logger
     self.activityIndicator = activityIndicator
-    self.session = session
+    self.nwConfigurations = configurations
   }
   
   private struct UnexpectedValuesRepresentation: Error {}
@@ -27,8 +29,11 @@ public final class Networker: HTTPClient {
   }
   
   
-  public func get(from url: URL, completion: @escaping (HTTPClient.Result) -> Void) -> HTTPClientTask {
-    let task = session.session.dataTask(with: url) { data, response, error in
+  public func get(
+    from url: URL,
+    completion: @escaping (HTTPClient.Result) -> Void
+  ) -> HTTPClientTask {
+    let task = nwConfigurations.session.dataTask(with: url) { data, response, error in
       completion(Result {
         if let error = error {
           throw error
@@ -54,12 +59,14 @@ public final class Networker: HTTPClient {
     
     let nwRequest = NWRequestBuilder(request: request)
     
+    reachabilityMonitor.startMonitoring()
+    
     if withLoader {
       activityIndicator.addLoader()
     }
     
     // Staring Session Execution // - TODO: should check if [weak self] should be used here
-    let task = session.session.dataTask(with: nwRequest.urlRequest) { data, urlResponse, error in
+    let task = nwConfigurations.session.dataTask(with: nwRequest.urlRequest) { data, urlResponse, error in
       
       self.handleDataTaskResponse(request: nwRequest, response: response, urlResponse: urlResponse, data: data, error: error) { result in
         DispatchQueue.main.async {
@@ -69,6 +76,8 @@ public final class Networker: HTTPClient {
         if withLoader {
           self.activityIndicator.removeLoader()
         }
+        
+        self.reachabilityMonitor.stopMonitoring()
       }
     }
     
