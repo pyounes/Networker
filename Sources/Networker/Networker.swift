@@ -2,53 +2,38 @@ import Foundation
 
 public final class Networker: HTTPClient {
   
-  private let nwConfigurations: NWSessionConfiguration
+  private let configurations: NWSessionConfiguration
   private let logger: NWLogger
   private let activityIndicator: NWActivityIndicator
+  private let monitor: NWMonitor
   
   public init(
     configurations: NWSessionConfiguration,
     logger: NWLogger,
-    activityIndicator: NWActivityIndicator
+    activityIndicator: NWActivityIndicator,
+    monitor: NWMonitor
   ) {
+    self.configurations = configurations
     self.logger = logger
-    self.activityIndicator = activityIndicator
-    self.nwConfigurations = configurations
+    self.activityIndicator = MainQueueDispatchDecorator(decoratee: activityIndicator)
+    self.monitor = monitor
+    
+    monitor.startMonitoring()
   }
   
   private struct UnexpectedValuesRepresentation: Error {}
   
   private struct URLSessionTaskWrapper: HTTPClientTask {
     let wrapped: URLSessionTask
-
+    
     func cancel() {
       wrapped.cancel()
     }
   }
   
-  
-  public func get(
-    from url: URL,
-    completion: @escaping (HTTPClient.Result) -> Void
-  ) -> HTTPClientTask {
-    let task = nwConfigurations.session.dataTask(with: url) { data, response, error in
-      completion(Result {
-        if let error = error {
-          throw error
-        } else if let data = data, let response = response as? HTTPURLResponse {
-          return (data, response)
-        } else {
-          throw UnexpectedValuesRepresentation()
-        }
-      })
-    }
-    task.resume()
-    return URLSessionTaskWrapper(wrapped: task)
-  }
-  
-  
   /// Without Parameters of type RequestParams
-  public func taskHandler<Response: Decodable>(
+  @discardableResult
+  public func get<Response: Decodable>(
     request: NWRequest,
     response: Response.Type,
     withLoader: Bool = false,
@@ -61,8 +46,8 @@ public final class Networker: HTTPClient {
       activityIndicator.addLoader()
     }
     
-    // Staring Session Execution // - TODO: should check if [weak self] should be used here
-    let task = nwConfigurations.session.dataTask(with: nwRequest.urlRequest) { data, urlResponse, error in
+    // Staring Session Execution
+    let task = configurations.session.dataTask(with: nwRequest.urlRequest) { data, urlResponse, error in
       
       self.handleDataTaskResponse(request: nwRequest, response: response, urlResponse: urlResponse, data: data, error: error) { result in
         DispatchQueue.main.async {
@@ -72,7 +57,6 @@ public final class Networker: HTTPClient {
         if withLoader {
           self.activityIndicator.removeLoader()
         }
-          
       }
     }
     
@@ -106,7 +90,11 @@ public final class Networker: HTTPClient {
     do {
       
       if let error = error {
+        if monitor.isConnected {
           throw error
+        } else {
+          throw NWCustomError.noInternet
+        }
       }
       
       guard
@@ -166,5 +154,9 @@ public final class Networker: HTTPClient {
         completion(.success(result))
       }
     }
+  }
+  
+  deinit {
+    monitor.stopMonitoring()
   }
 }

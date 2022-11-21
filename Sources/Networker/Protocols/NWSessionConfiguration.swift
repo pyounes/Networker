@@ -19,7 +19,7 @@ public protocol NWSessionConfiguration {
 
 
 public extension NWSessionConfiguration {
-    
+  
   var session: URLSession { URLSession(configuration: sessionConfigurations) }
   
   var sessionConfigurations: URLSessionConfiguration {
