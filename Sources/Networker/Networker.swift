@@ -6,8 +6,6 @@ public final class Networker: HTTPClient {
   private let logger: NWLogger
   private let activityIndicator: NWActivityIndicator
   
-  private let reachabilityMonitor = NWMonitor.shared
-  
   public init(
     configurations: NWSessionConfiguration,
     logger: NWLogger,
@@ -59,8 +57,6 @@ public final class Networker: HTTPClient {
     
     let nwRequest = NWRequestBuilder(request: request)
     
-    reachabilityMonitor.startMonitoring()
-    
     if withLoader {
       activityIndicator.addLoader()
     }
@@ -76,8 +72,7 @@ public final class Networker: HTTPClient {
         if withLoader {
           self.activityIndicator.removeLoader()
         }
-        
-        self.reachabilityMonitor.stopMonitoring()
+          
       }
     }
     
@@ -111,11 +106,7 @@ public final class Networker: HTTPClient {
     do {
       
       if let error = error {
-        if NWMonitor.shared.isConnected {
           throw error
-        } else {
-          throw NWCustomError.noInternet
-        }
       }
       
       guard
@@ -152,11 +143,11 @@ public final class Networker: HTTPClient {
       completion(.failure(NWCustomError.noInternet))
     } catch let decodingError as DecodingError {
       // Decoding Error
-      logger.log(title: "DECODING-ERROR", decodingError.debugDescription)
+      logger.log(title: "NW-ERROR-DECODING", decodingError.debugDescription)
       completion(.failure(decodingError))
     } catch {
       // Unknown Error
-      logger.log(title: "RESPONSE", error.localizedDescription)
+      logger.log(title: "NW-ERROR-RESPONSE", error.localizedDescription)
       completion(.failure(error))
     }
   }

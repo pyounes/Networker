@@ -68,24 +68,15 @@ final class NetworkerTests: XCTestCase {
 
     let request = TermsAPI.getTerms
     let apiCaller = Networker(configurations: session(), logger: logger(), activityIndicator: activityIndicator())
-//    let monitor = NWMonitor()
 
     let exp = expectation(description: "wait for call")
-//    monitor.startMonitoring()
   
-    let task = apiCaller.taskHandler(request: request, response: Root.self) { _ in
+    apiCaller.taskHandler(request: request, response: Root.self) { _ in
 //      dump(result)
-//      monitor.startMonitoring()
       exp.fulfill()
-    }
-    
-    DispatchQueue.main.async {
-      task.cancel()
-      print("TASK - CANCELED")
     }
 
     wait(for: [exp], timeout: 10.0)
-
   }
   
   
