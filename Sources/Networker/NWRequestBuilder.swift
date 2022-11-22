@@ -36,31 +36,31 @@ final class NWRequestBuilder {
   var urlRequest: URLRequest {
     
     // constructing a URLRequest with The urlWithPath ( with path and query if available )
-    var request = URLRequest(url: url)
+    var urlRequest = URLRequest(url: url)
     
     // adding respective HttpMethod
-    request.httpMethod = nwRequest.httpMethod.type
+    urlRequest.httpMethod = nwRequest.httpMethod.type
     
     // adding general default Headers 
-    request.setValue("application/json", forHTTPHeaderField: "Accept")
-    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
+    urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
     
     // adding default endpointHeader
-    nwRequest.headers?.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
+    nwRequest.headers?.forEach { urlRequest.setValue($0.value, forHTTPHeaderField: $0.key) }
     
     // adding Token if required
     if nwRequest.withToken {
-      request.setValue("Bearer \(nwRequest.token)", forHTTPHeaderField: "Authorization")
+      urlRequest.setValue("Bearer \(nwRequest.token)", forHTTPHeaderField: "Authorization")
     }
     
     // adding additional body Parameters
     if let params = nwRequest.parameters,
        !params.isEmpty,
        let data = try? JSONSerialization.data(withJSONObject: params, options: []) {
-      request.httpBody = data
+      urlRequest.httpBody = data
     }
     
-    return request
+    return urlRequest
   }
   
 }

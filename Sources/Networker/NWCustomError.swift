@@ -8,6 +8,7 @@
 import Foundation
 
 public enum NWCustomError: Error {
+  case invalidURL
   case serverDown
   case noInternet
   case unauthorized
@@ -23,6 +24,8 @@ extension NWCustomError: LocalizedError {
   
   var localizedDescription: String {
     switch self {
+    case .invalidURL:
+      return "Invalid URL"
     case .serverDown:
       return "Server or Endpoint Unavailable"
     case .noInternet:
