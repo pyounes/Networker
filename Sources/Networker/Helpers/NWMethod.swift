@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum NWMethod: String {
+public enum NWMethod: String, Equatable, Hashable {
   
   case get
   case post

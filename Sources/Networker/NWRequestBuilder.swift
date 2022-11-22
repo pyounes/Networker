@@ -15,29 +15,28 @@ final class NWRequestBuilder {
     self.nwRequest = request
   }
   
-  var urlWithPath: URL {
-    let requestURL =  nwRequest.baseURL.appendingPathComponent(nwRequest.path, isDirectory: false)
+  private var url: URL {
+    
+    let baseURLWithPath =  nwRequest.baseURL.appendingPathComponent(nwRequest.path, isDirectory: false)
     
     guard
       let queryItems = nwRequest.query?.compactMapValues({ $0 }).map({ URLQueryItem(name: $0, value: $1) }),
       !queryItems.isEmpty,
-      var urlComponents = URLComponents(url: requestURL, resolvingAgainstBaseURL: true)
+      var urlComponents = URLComponents(url: baseURLWithPath, resolvingAgainstBaseURL: true)
     else {
-      return requestURL
+      return baseURLWithPath
     }
     
     urlComponents.queryItems = queryItems
     
-    guard let constructedURL = urlComponents.url else { return requestURL }
-    
-    return constructedURL
+    return urlComponents.url ?? baseURLWithPath
   }
   
   
   var urlRequest: URLRequest {
     
     // constructing a URLRequest with The urlWithPath ( with path and query if available )
-    var request = URLRequest(url: urlWithPath)
+    var request = URLRequest(url: url)
     
     // adding respective HttpMethod
     request.httpMethod = nwRequest.httpMethod.type
