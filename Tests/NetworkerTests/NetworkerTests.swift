@@ -1,5 +1,6 @@
 import XCTest
 import Networker
+import Network
 
 struct Root: Decodable {
   let status: Bool
@@ -24,74 +25,63 @@ enum TermsAPI: NWRequest {
   
   var path: String { "/merchant-app/termsAndConditions" }
   
-//  var headers: [String : String]? {
-//    ["testing":"headers"]
-//  }
+  //  var headers: [String : String]? {
+  //    ["testing":"headers"]
+  //  }
   
-//  var query: [String : String?]? {
-//    ["testing": nil,
-//     "batata" : "batenjen"]
-//  }
+  //  var query: [String : String?]? {
+  //    ["testing": nil,
+  //     "batata" : "batenjen"]
+  //  }
   
-//  var parameters: [String : Any]?{
-//    ["testing":"parameters"]
-//  }
+  //  var parameters: [String : Any]?{
+  //    ["testing":"parameters"]
+  //  }
   
-//  var withToken: Bool {
-//    false
-//  }
+  //  var withToken: Bool {
+  //    false
+  //  }
   
-//  var token: String {
-//    "TESTING_TOKEN-123ouiwkdsjv"
-//  }
-
-//  var acceptableStatusCodes: ClosedRange<Int> {
-//    return 200...299
-//  }
-
-//  var httpMethod: NWMethod {
-//    .get
-//  }
+  //  var token: String {
+  //    "TESTING_TOKEN-123ouiwkdsjv"
+  //  }
+  
+  //    var acceptableStatusCodes: ClosedRange<Int> {
+  //      return 200...299
+  //    }
+  
+  //  var httpMethod: NWMethod {
+  //    .get
+  //  }
   
 }
 
-fileprivate class session: NWSessionConfiguration {}
-fileprivate class logger: NWLogger {}
-fileprivate class activityIndicator: NWActivityIndicator {}
+fileprivate class Session: NWSessionConfiguration {}
+fileprivate class Logger: NWLogger {}
+fileprivate class ActivityIndicator: NWActivityIndicator {}
+fileprivate class Monitor: NWMonitor { }
 
 final class NetworkerTests: XCTestCase {
   func testExample() throws {
     // This is an example of a functional test case.
     // Use XCTAssert and related functions to verify your tests produce the correct
     // results.
-
+    
     let request = TermsAPI.getTerms
-    let apiCaller = Networker(session: session(), logger: logger(), activityIndicator: activityIndicator())
-
+    let apiCaller = Networker(configurations: Session(),
+                              logger: Logger(),
+                              activityIndicator: ActivityIndicator(),
+                              monitor: Monitor())
+    
     let exp = expectation(description: "wait for call")
-
-    apiCaller.taskHandler(request: request, response: Root.self) { result in
-//      dump(result)
+    
+    apiCaller.get(request: request, response: Root.self) { _ in
+      //      dump(result)
       exp.fulfill()
     }
-
-    wait(for: [exp], timeout: 1.0)
-
+    
+//    task.cancel()
+    
+    wait(for: [exp], timeout: 10.0)
   }
-  
-  
-//  func testinQuery() {
-//
-//    let items: [String: String?]? = ["testing": nil, "batata" : "batenjen"]
-////    dump(items)
-//
-////    let query = items?.mapValues { URLQueryItem(name: $0.key, value: $0.value) }//.compactMap({ $0 })
-////    dump(query)
-//    let query = items?.compactMapValues { $0 }//.compactMap({ $0 })
-//    dump(query)
-//
-//    let output = query?.map { URLQueryItem(name: $0.key, value: $0.value) }
-//    dump(output)
-//  }
-  
 }

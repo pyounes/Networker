@@ -8,6 +8,7 @@
 import Foundation
 
 public enum NWCustomError: Error {
+  case invalidURL
   case serverDown
   case noInternet
   case unauthorized
@@ -15,7 +16,7 @@ public enum NWCustomError: Error {
   case emptyData
   case authorizationError
   case endPointServerDown
-  case invalidStatusCode(Int)
+  case invalidStatusCode(ClosedRange<Int>, Int)
   case invalidResponse
 }
 
@@ -23,6 +24,8 @@ extension NWCustomError: LocalizedError {
   
   var localizedDescription: String {
     switch self {
+    case .invalidURL:
+      return "Invalid URL"
     case .serverDown:
       return "Server or Endpoint Unavailable"
     case .noInternet:
@@ -37,8 +40,8 @@ extension NWCustomError: LocalizedError {
       return "Endpoint Server Down"
     case .emptyData:
       return "Empty Data"
-    case let .invalidStatusCode(code):
-      return "Expected 200 ~ 299, but got \(code.description) instead"
+    case let .invalidStatusCode(expectedCode, receivedCode):
+      return "Expected StatusCode range between \(expectedCode.lowerBound.description) ~ \(expectedCode.upperBound.description), but got \(receivedCode.description) instead"
     case .invalidResponse:
       return "Request did not return HttpURLResponse"
     }

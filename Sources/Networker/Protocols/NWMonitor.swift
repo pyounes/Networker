@@ -2,13 +2,38 @@
 //  NWMonitor.swift
 //  
 //
-//  Created by Pierre Younes on 17/11/2022.
+//  Created by Pierre Younes on 21/11/2022.
 //
 
 import Network
 
-final class NWMonitor {
-  static let shared = NWMonitor()
+public protocol NWMonitor {
+  var isConnected: Bool { get }
+  
+  func startMonitoring()
+  func stopMonitoring()
+}
+
+
+public extension NWMonitor {
+  
+  var isConnected: Bool {
+    return NetworkMonitor.shared.isConnected
+  }
+  
+  func startMonitoring() {
+    NetworkMonitor.shared.startMonitoring()
+  }
+  
+  func stopMonitoring() {
+    NetworkMonitor.shared.stopMonitoring()
+  }
+}
+
+
+
+final class NetworkMonitor {
+  static let shared = NetworkMonitor()
   
   private let queue = DispatchQueue.global()
   private let monitor: NWPathMonitor
@@ -25,13 +50,7 @@ final class NWMonitor {
       self?.isConnected = path.status == .satisfied
       print("isConnected: \(path.status)")
       
-      if !(path.status == .satisfied) {
-        //                DispatchQueue.main.async {
-        //                    if let vc = UIApplication.topViewController() {
-        //                        vc.showAlert(alertText: "Error", alertMessage: "Your Internet connection appears to be offline")
-        //                    }
-        //                }
-      }
+      if !(path.status == .satisfied) { }
       
     }
   }

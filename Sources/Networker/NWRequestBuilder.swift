@@ -15,53 +15,52 @@ final class NWRequestBuilder {
     self.nwRequest = request
   }
   
-  var urlWithPath: URL {
-    let requestURL =  nwRequest.baseURL.appendingPathComponent(nwRequest.path, isDirectory: false)
+  private var url: URL {
+    
+    let baseURLWithPath =  nwRequest.baseURL.appendingPathComponent(nwRequest.path, isDirectory: false)
     
     guard
       let queryItems = nwRequest.query?.compactMapValues({ $0 }).map({ URLQueryItem(name: $0, value: $1) }),
       !queryItems.isEmpty,
-      var urlComponents = URLComponents(url: requestURL, resolvingAgainstBaseURL: true)
+      var urlComponents = URLComponents(url: baseURLWithPath, resolvingAgainstBaseURL: true)
     else {
-      return requestURL
+      return baseURLWithPath
     }
     
     urlComponents.queryItems = queryItems
     
-    guard let constructedURL = urlComponents.url else { return requestURL }
-    
-    return constructedURL
+    return urlComponents.url ?? baseURLWithPath
   }
   
   
   var urlRequest: URLRequest {
     
     // constructing a URLRequest with The urlWithPath ( with path and query if available )
-    var request = URLRequest(url: urlWithPath)
+    var urlRequest = URLRequest(url: url)
     
     // adding respective HttpMethod
-    request.httpMethod = nwRequest.httpMethod.type
+    urlRequest.httpMethod = nwRequest.httpMethod.type
     
     // adding general default Headers 
-    request.setValue("application/json", forHTTPHeaderField: "Accept")
-    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
+    urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
     
     // adding default endpointHeader
-    nwRequest.headers?.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
+    nwRequest.headers?.forEach { urlRequest.setValue($0.value, forHTTPHeaderField: $0.key) }
     
     // adding Token if required
     if nwRequest.withToken {
-      request.setValue("Bearer \(nwRequest.token)", forHTTPHeaderField: "Authorization")
+      urlRequest.setValue("Bearer \(nwRequest.token)", forHTTPHeaderField: "Authorization")
     }
     
     // adding additional body Parameters
     if let params = nwRequest.parameters,
        !params.isEmpty,
        let data = try? JSONSerialization.data(withJSONObject: params, options: []) {
-      request.httpBody = data
+      urlRequest.httpBody = data
     }
     
-    return request
+    return urlRequest
   }
   
 }

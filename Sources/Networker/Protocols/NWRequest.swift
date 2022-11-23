@@ -23,6 +23,7 @@ public protocol NWRequest {
   
 }
 
+// MARK: - Default Implementation
 
 public extension NWRequest {
   var acceptableStatusCodes: ClosedRange<Int> { 200...299 }

@@ -12,10 +12,15 @@ public protocol HTTPClientTask {
 }
 
 public protocol HTTPClient {
-  typealias Result = Swift.Result<(Data, HTTPURLResponse), Error>
-
-  /// The completion handler can be invoked in any thread.
-  /// Clients are responsible to dispatch to appropriate threads, if needed.
+  
+  /// Request With NWRequest
+  /// To be used for the framework
+  /// returns response with the model invoked in the caller
   @discardableResult
-  func get(from url: URL, completion: @escaping (Result) -> Void) -> HTTPClientTask
+  func get<Response: Decodable>(
+    request: NWRequest,
+    response: Response.Type,
+    withLoader: Bool,
+    completion: @escaping (Swift.Result<Response, Error>) -> Void
+  ) -> HTTPClientTask
 }

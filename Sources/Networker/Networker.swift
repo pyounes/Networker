@@ -1,29 +1,34 @@
 import Foundation
 
-public final class Networker {
+public final class Networker: HTTPClient {
   
+  private let configurations: NWSessionConfiguration
   private let logger: NWLogger
   private let activityIndicator: NWActivityIndicator
-  private let session: NWSessionConfiguration
+  private let monitor: NWMonitor
   
   public init(
-    session: NWSessionConfiguration,
+    configurations: NWSessionConfiguration,
     logger: NWLogger,
-    activityIndicator: NWActivityIndicator
+    activityIndicator: NWActivityIndicator,
+    monitor: NWMonitor
   ) {
+    self.configurations = configurations
     self.logger = logger
-    self.activityIndicator = activityIndicator
-    self.session = session
+    self.activityIndicator = MainQueueDispatchDecorator(decoratee: activityIndicator)
+    self.monitor = monitor
+    
+    monitor.startMonitoring()
   }
   
-  
   /// Without Parameters of type RequestParams
-  public func taskHandler<Response: Decodable>(
+  @discardableResult
+  public func get<Response: Decodable>(
     request: NWRequest,
     response: Response.Type,
     withLoader: Bool = false,
     completion: @escaping (Result<Response, Error>) -> Void
-  ) {
+  ) -> HTTPClientTask {
     
     let nwRequest = NWRequestBuilder(request: request)
     
@@ -31,13 +36,15 @@ public final class Networker {
       activityIndicator.addLoader()
     }
     
-    // Staring Session Execution // - TODO: should check if [weak self] should be used here
-    let task = session.session.dataTask(with: nwRequest.urlRequest) { data, urlResponse, error in
+    // Staring Session Execution
+    let task = configurations.session.dataTask(with: nwRequest.urlRequest) { data, urlResponse, error in
       
       self.handleDataTaskResponse(request: nwRequest, response: response, urlResponse: urlResponse, data: data, error: error) { result in
         DispatchQueue.main.async {
           completion(result)
         }
+        
+        
         
         if withLoader {
           self.activityIndicator.removeLoader()
@@ -46,6 +53,7 @@ public final class Networker {
     }
     
     task.resume()
+    return URLSessionTaskWrapper(wrapped: task)
   }
   
   
@@ -74,7 +82,7 @@ public final class Networker {
     do {
       
       if let error = error {
-        if NWMonitor.shared.isConnected {
+        if monitor.isConnected {
           throw error
         } else {
           throw NWCustomError.noInternet
@@ -90,7 +98,7 @@ public final class Networker {
       guard
         request.nwRequest.acceptableStatusCodes.contains(httpURLResponse.statusCode)
       else {
-        throw NWCustomError.invalidStatusCode(httpURLResponse.statusCode)
+        throw NWCustomError.invalidStatusCode(request.nwRequest.acceptableStatusCodes, httpURLResponse.statusCode)
       }
       
       guard
@@ -109,17 +117,17 @@ public final class Networker {
         completion(result)
       }
       
-    } catch NWCustomError.noInternet {
+    } catch let nwCustomError as NWCustomError {
       // Internet Unavailable
-      logger.log(title: "NO-INTERNET", NWCustomError.noInternet.localizedDescription)
-      completion(.failure(NWCustomError.noInternet))
+      logger.log(title: "NW-CUSTOM-ERROR", nwCustomError.localizedDescription)
+      completion(.failure(nwCustomError))
     } catch let decodingError as DecodingError {
       // Decoding Error
-      logger.log(title: "DECODING-ERROR", decodingError.debugDescription)
+      logger.log(title: "NW-ERROR-DECODING", decodingError.debugDescription)
       completion(.failure(decodingError))
     } catch {
       // Unknown Error
-      logger.log(title: "RESPONSE", error.localizedDescription)
+      logger.log(title: "NW-ERROR-RESPONSE", error.localizedDescription)
       completion(.failure(error))
     }
   }
@@ -139,4 +147,23 @@ public final class Networker {
       }
     }
   }
+  
+  deinit {
+    monitor.stopMonitoring()
+  }
+}
+
+
+private extension Networker {
+  
+  private struct UnexpectedValuesRepresentation: Error {}
+  
+  private struct URLSessionTaskWrapper: HTTPClientTask {
+    let wrapped: URLSessionTask
+    
+    func cancel() {
+      wrapped.cancel()
+    }
+  }
+  
 }

@@ -11,18 +11,18 @@ import Foundation
 public protocol NWSessionConfiguration {
   
   // URLSession
-  var session                : URLSession                { get }
+  var session: URLSession { get }
   
   // URLSession Configurations
-  var urlSessionConfigurations  : URLSessionConfiguration   { get }
+  var sessionConfigurations: URLSessionConfiguration { get }
 }
 
 
 public extension NWSessionConfiguration {
-    
-  var session: URLSession { URLSession(configuration: urlSessionConfigurations) }
   
-  var urlSessionConfigurations: URLSessionConfiguration {
+  var session: URLSession { URLSession(configuration: sessionConfigurations) }
+  
+  var sessionConfigurations: URLSessionConfiguration {
     let config = URLSessionConfiguration.ephemeral
     config.timeoutIntervalForRequest          = 30
     config.timeoutIntervalForResource         = 30
