@@ -40,15 +40,15 @@ public final class Networker: HTTPClient {
     let task = configurations.session.dataTask(with: nwRequest.urlRequest) { data, urlResponse, error in
       
       self.handleDataTaskResponse(request: nwRequest, response: response, urlResponse: urlResponse, data: data, error: error) { result in
+        
         DispatchQueue.main.async {
           completion(result)
         }
         
-        
-        
         if withLoader {
           self.activityIndicator.removeLoader()
         }
+        
       }
     }
     
@@ -98,17 +98,17 @@ public final class Networker: HTTPClient {
       guard
         request.nwRequest.acceptableStatusCodes.contains(httpURLResponse.statusCode)
       else {
-        throw NWCustomError.invalidStatusCode(request.nwRequest.acceptableStatusCodes, httpURLResponse.statusCode)
+        throw NWCustomError.unacceptableStatusCode(httpURLResponse.statusCode)
       }
+      
+      // STATUS CODE
+      logger.log(title: "STATUS-CODE", httpURLResponse.statusCode.description)
       
       guard
         let data = data
       else {
         throw NWCustomError.emptyData
       }
-      
-      // STATUS CODE
-      logger.log(title: "STATUS-CODE", httpURLResponse.statusCode.description)
       
       // Printing JSON
       logger.log(title: "RESPONSE", data.prettyJson)
@@ -148,6 +148,7 @@ public final class Networker: HTTPClient {
     }
   }
   
+  // MARK: - Deinit
   deinit {
     monitor.stopMonitoring()
   }
