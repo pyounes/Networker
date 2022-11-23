@@ -27,13 +27,13 @@ final class MainQueueDispatchDecorator<T> {
 extension MainQueueDispatchDecorator: NWActivityIndicator where T == NWActivityIndicator {
   
   func addLoader() {
-    self.dispatch { [weak self] in
+    dispatch { [weak self] in
       self?.decoratee.addLoader()
     }
   }
   
   func removeLoader() {
-    self.dispatch { [weak self] in
+    dispatch { [weak self] in
       self?.decoratee.removeLoader()
     }
   }

@@ -21,16 +21,6 @@ public final class Networker: HTTPClient {
     monitor.startMonitoring()
   }
   
-  private struct UnexpectedValuesRepresentation: Error {}
-  
-  private struct URLSessionTaskWrapper: HTTPClientTask {
-    let wrapped: URLSessionTask
-    
-    func cancel() {
-      wrapped.cancel()
-    }
-  }
-  
   /// Without Parameters of type RequestParams
   @discardableResult
   public func get<Response: Decodable>(
@@ -53,6 +43,8 @@ public final class Networker: HTTPClient {
         DispatchQueue.main.async {
           completion(result)
         }
+        
+        
         
         if withLoader {
           self.activityIndicator.removeLoader()
@@ -106,7 +98,7 @@ public final class Networker: HTTPClient {
       guard
         request.nwRequest.acceptableStatusCodes.contains(httpURLResponse.statusCode)
       else {
-        throw NWCustomError.invalidStatusCode(httpURLResponse.statusCode)
+        throw NWCustomError.invalidStatusCode(request.nwRequest.acceptableStatusCodes, httpURLResponse.statusCode)
       }
       
       guard
@@ -125,10 +117,10 @@ public final class Networker: HTTPClient {
         completion(result)
       }
       
-    } catch NWCustomError.noInternet {
+    } catch let nwCustomError as NWCustomError {
       // Internet Unavailable
-      logger.log(title: "NO-INTERNET", NWCustomError.noInternet.localizedDescription)
-      completion(.failure(NWCustomError.noInternet))
+      logger.log(title: "NW-CUSTOM-ERROR", nwCustomError.localizedDescription)
+      completion(.failure(nwCustomError))
     } catch let decodingError as DecodingError {
       // Decoding Error
       logger.log(title: "NW-ERROR-DECODING", decodingError.debugDescription)
@@ -159,4 +151,19 @@ public final class Networker: HTTPClient {
   deinit {
     monitor.stopMonitoring()
   }
+}
+
+
+private extension Networker {
+  
+  private struct UnexpectedValuesRepresentation: Error {}
+  
+  private struct URLSessionTaskWrapper: HTTPClientTask {
+    let wrapped: URLSessionTask
+    
+    func cancel() {
+      wrapped.cancel()
+    }
+  }
+  
 }

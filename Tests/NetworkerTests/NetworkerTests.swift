@@ -46,9 +46,9 @@ enum TermsAPI: NWRequest {
   //    "TESTING_TOKEN-123ouiwkdsjv"
   //  }
   
-  //  var acceptableStatusCodes: ClosedRange<Int> {
-  //    return 200...299
-  //  }
+  //    var acceptableStatusCodes: ClosedRange<Int> {
+  //      return 200...299
+  //    }
   
   //  var httpMethod: NWMethod {
   //    .get
@@ -81,7 +81,6 @@ final class NetworkerTests: XCTestCase {
     }
     
 //    task.cancel()
-    
     
     wait(for: [exp], timeout: 10.0)
   }
