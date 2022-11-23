@@ -10,7 +10,7 @@ import Foundation
 public protocol NWRequest {
   
   /// Acceptable Status Codes
-  var acceptableStatusCodes : ClosedRange<Int>        { get }
+  var acceptableStatusCodes : [Int]                   { get }
   
   var baseURL               : URL                     { get }
   var path                  : String                  { get }
@@ -26,7 +26,7 @@ public protocol NWRequest {
 // MARK: - Default Implementation
 
 public extension NWRequest {
-  var acceptableStatusCodes: ClosedRange<Int> { 200...299 }
+  var acceptableStatusCodes: [Int] { Array(200...299) }
   var headers: [String: String]? { nil }
   var httpMethod: NWMethod { NWMethod.get }
   var query: [String: String?]? { nil }
