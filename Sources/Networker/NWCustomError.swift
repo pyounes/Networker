@@ -16,7 +16,7 @@ public enum NWCustomError: Error {
   case emptyData
   case authorizationError
   case endPointServerDown
-  case invalidStatusCode(ClosedRange<Int>, Int)
+  case unacceptableStatusCode(Int)
   case invalidResponse
 }
 
@@ -40,8 +40,8 @@ extension NWCustomError: LocalizedError {
       return "Endpoint Server Down"
     case .emptyData:
       return "Empty Data"
-    case let .invalidStatusCode(expectedCode, receivedCode):
-      return "Expected StatusCode range between \(expectedCode.lowerBound.description) ~ \(expectedCode.upperBound.description), but got \(receivedCode.description) instead"
+    case let .unacceptableStatusCode(receivedCode):
+      return "Unacceptable StatusCode received \(receivedCode.description), Check acceptableStatusCodes property in NWRequest"
     case .invalidResponse:
       return "Request did not return HttpURLResponse"
     }
