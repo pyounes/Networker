@@ -11,8 +11,7 @@ public protocol NWLogger {
   func log(title: String, _ description: String)
 }
 
-
-public extension NWLogger {
+final class NWDefaultLogger: NWLogger {
   func log(title: String, _ description: String) {
 #if DEBUG
     print("""

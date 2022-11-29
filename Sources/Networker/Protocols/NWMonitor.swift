@@ -15,32 +15,14 @@ public protocol NWMonitor {
 }
 
 
-public extension NWMonitor {
-  
-  var isConnected: Bool {
-    return NetworkMonitor.shared.isConnected
-  }
-  
-  func startMonitoring() {
-    NetworkMonitor.shared.startMonitoring()
-  }
-  
-  func stopMonitoring() {
-    NetworkMonitor.shared.stopMonitoring()
-  }
-}
-
-
-
-final class NetworkMonitor {
-  static let shared = NetworkMonitor()
+final class NWDefaultNetworkMonitor: NWMonitor {
   
   private let queue = DispatchQueue.global()
   private let monitor: NWPathMonitor
   
   public private(set) var isConnected: Bool = false
   
-  private init() {
+  init() {
     monitor = NWPathMonitor()
   }
   
