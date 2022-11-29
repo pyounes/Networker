@@ -17,15 +17,14 @@ public protocol NWSessionConfiguration {
   var sessionConfigurations: URLSessionConfiguration { get }
 }
 
-
-public extension NWSessionConfiguration {
+final class NWNDefaultSessionConfiguration: NWSessionConfiguration {
   
   var session: URLSession { URLSession(configuration: sessionConfigurations) }
   
   var sessionConfigurations: URLSessionConfiguration {
     let config = URLSessionConfiguration.ephemeral
-    config.timeoutIntervalForRequest          = 30
-    config.timeoutIntervalForResource         = 30
+    config.timeoutIntervalForRequest          = 5
+    config.timeoutIntervalForResource         = 5
     config.waitsForConnectivity               = true
     return config
   }

@@ -21,6 +21,16 @@ public final class Networker: HTTPClient {
     monitor.startMonitoring()
   }
   
+  public init() {
+    self.configurations = NWNDefaultSessionConfiguration()
+    self.logger = NWDefaultLogger()
+    self.activityIndicator = MainQueueDispatchDecorator(decoratee: NWDefaultActivityIndicator())
+    self.monitor = NWDefaultNetworkMonitor()
+    
+    monitor.startMonitoring()
+  }
+  
+  
   /// Without Parameters of type RequestParams
   @discardableResult
   public func get<Response: Decodable>(

@@ -12,8 +12,7 @@ public protocol NWActivityIndicator {
   func removeLoader()
 }
 
-
-public extension NWActivityIndicator {
+final class NWDefaultActivityIndicator: NWActivityIndicator {
   func addLoader() { }
   func removeLoader() { }
 }

@@ -56,11 +56,6 @@ enum TermsAPI: NWRequest {
   
 }
 
-fileprivate class Session: NWSessionConfiguration {}
-fileprivate class Logger: NWLogger {}
-fileprivate class ActivityIndicator: NWActivityIndicator {}
-fileprivate class Monitor: NWMonitor { }
-
 final class NetworkerTests: XCTestCase {
   func testExample() throws {
     // This is an example of a functional test case.
@@ -68,10 +63,7 @@ final class NetworkerTests: XCTestCase {
     // results.
     
     let request = TermsAPI.getTerms
-    let apiCaller = Networker(configurations: Session(),
-                              logger: Logger(),
-                              activityIndicator: ActivityIndicator(),
-                              monitor: Monitor())
+    let apiCaller = Networker()
     
     let exp = expectation(description: "wait for call")
     
