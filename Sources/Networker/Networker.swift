@@ -30,8 +30,13 @@ public final class Networker: HTTPClient {
     monitor.startMonitoring()
   }
   
-  
-  /// Without Parameters of type RequestParams
+  /// Generic Api Call
+  /// - Parameters:
+  ///   - request: NWRequest - Request should conform to `NWRequest` Protocol
+  ///   - response: Any Object Conforming to `Codable`
+  ///   - withLoader: Bool, whether a Loading indicator should be triggered on api call
+  ///   - completion: Decoded Response if .success, Error if .failure
+  /// - Returns: HTTPClientTask, Return the wrapper call with the ability to cancel it
   @discardableResult
   public func get<Response: Decodable>(
     request: NWRequest,
