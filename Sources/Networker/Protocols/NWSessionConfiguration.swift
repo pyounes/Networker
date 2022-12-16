@@ -23,8 +23,8 @@ final class NWNDefaultSessionConfiguration: NWSessionConfiguration {
   
   var sessionConfigurations: URLSessionConfiguration {
     let config = URLSessionConfiguration.ephemeral
-    config.timeoutIntervalForRequest          = 5
-    config.timeoutIntervalForResource         = 5
+    config.timeoutIntervalForRequest          = 30
+    config.timeoutIntervalForResource         = 30
     config.waitsForConnectivity               = true
     return config
   }
