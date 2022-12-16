@@ -2,18 +2,18 @@ import Foundation
 
 public final class Networker: HTTPClient {
   
-  private let configurations: NWSessionConfiguration
+  private let networkConfigurations: NWSessionConfiguration
   private let logger: NWLogger
   private let activityIndicator: NWActivityIndicator
   private let monitor: NWMonitor
   
   public init(
-    configurations: NWSessionConfiguration,
+            networkConfiguration: NWSessionConfiguration,
     logger: NWLogger,
     activityIndicator: NWActivityIndicator,
     monitor: NWMonitor
   ) {
-    self.configurations = configurations
+    self.networkConfigurations = networkConfiguration
     self.logger = logger
     self.activityIndicator = MainQueueDispatchDecorator(decoratee: activityIndicator)
     self.monitor = monitor
@@ -22,7 +22,7 @@ public final class Networker: HTTPClient {
   }
   
   public init() {
-    self.configurations = NWNDefaultSessionConfiguration()
+    self.networkConfigurations = NWNDefaultSessionConfiguration()
     self.logger = NWDefaultLogger()
     self.activityIndicator = MainQueueDispatchDecorator(decoratee: NWDefaultActivityIndicator())
     self.monitor = NWDefaultNetworkMonitor()
@@ -52,7 +52,7 @@ public final class Networker: HTTPClient {
     }
     
     // Staring Session Execution
-    let task = configurations.session.dataTask(with: nwRequest.urlRequest) { data, urlResponse, error in
+    let task = networkConfigurations.session.dataTask(with: nwRequest.urlRequest) { data, urlResponse, error in
       
       self.handleDataTaskResponse(request: nwRequest, response: response, urlResponse: urlResponse, data: data, error: error) { result in
         
