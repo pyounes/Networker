@@ -56,9 +56,13 @@ public final class Networker: HTTPClient {
       
       self.handleDataTaskResponse(request: nwRequest, response: response, urlResponse: urlResponse, data: data, error: error) { result in
         
-        DispatchQueue.main.async {
-          completion(result)
-        }
+          if Thread.isMainThread {
+              completion(result)
+          } else {
+              DispatchQueue.main.async {
+                  completion(result)
+              }
+          }
         
         if withLoader {
           self.activityIndicator.removeLoader()
