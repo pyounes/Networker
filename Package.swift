@@ -5,13 +5,16 @@ import PackageDescription
 
 let package = Package(
     name: "Networker",
-    platforms: [.macOS(.v10_15),
-                .iOS(.v13)],
+    platforms: [
+        .macOS(.v10_15),
+        .iOS(.v13)
+    ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "Networker",
-            targets: ["Networker"]),
+            targets: ["Networker"]
+        ),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -22,9 +25,11 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "Networker",
-            dependencies: []),
+            dependencies: []
+        ),
         .testTarget(
             name: "NetworkerTests",
-            dependencies: ["Networker"]),
+            dependencies: ["Networker"]
+        ),
     ]
 )

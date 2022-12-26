@@ -1,0 +1,18 @@
+//
+//  NWActivityIndicator.swift
+//  
+//
+//  Created by Pierre Younes on 14/11/2022.
+//
+
+import Foundation
+
+public protocol NWActivityIndicator {
+  func addLoader()
+  func removeLoader()
+}
+
+final class NWDefaultActivityIndicator: NWActivityIndicator {
+  func addLoader() { }
+  func removeLoader() { }
+}
