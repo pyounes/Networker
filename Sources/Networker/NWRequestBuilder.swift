@@ -10,42 +10,24 @@ import Foundation
 final class NWRequestBuilder {
   
   let nwRequest: NWRequest
+  private let url: URL
   
-  init(request: NWRequest) {
-    self.nwRequest = request
-  }
-  
-  private var url: URL {
-    
-    let baseURLWithPath =  nwRequest.baseURL.appendingPathComponent(nwRequest.path, isDirectory: false)
-    
-    guard
-      let queryItems = nwRequest.query?.compactMapValues({ $0 }).map({ URLQueryItem(name: $0, value: $1) }),
-      !queryItems.isEmpty,
-      var urlComponents = URLComponents(url: baseURLWithPath, resolvingAgainstBaseURL: true)
-    else {
-      return baseURLWithPath
-    }
-    
-    urlComponents.queryItems = queryItems
-    
-    return urlComponents.url ?? baseURLWithPath
-  }
-  
-  
-  var urlRequest: URLRequest {
-    
+  lazy var urlRequest: URLRequest = {
     // constructing a URLRequest with The urlWithPath ( with path and query if available )
     var urlRequest = URLRequest(url: url)
     
     // adding respective HttpMethod
     urlRequest.httpMethod = nwRequest.httpMethod.type
     
-    // adding general default Headers 
+    // adding general default Headers
     urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
     urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
     
-    // adding default endpointHeader
+    
+    // adding defaultRequests Header // headers for all requests provided in `NWMainBaseRequest`
+    nwRequest.defaultHeaders?.forEach { urlRequest.setValue($0.value, forHTTPHeaderField: $0.key) }
+    
+    // adding additional specific endpointHeaders provided in `NWRequest`
     nwRequest.headers?.forEach { urlRequest.setValue($0.value, forHTTPHeaderField: $0.key) }
     
     // adding Token if required
@@ -61,6 +43,25 @@ final class NWRequestBuilder {
     }
     
     return urlRequest
+  }()
+  
+  
+  init?(request: NWRequest) {
+    self.nwRequest = request
+    
+    let baseURLWithPath =  request.baseURL.appendingPathComponent(request.path, isDirectory: false)
+    
+    guard var urlComponents = URLComponents(url: baseURLWithPath, resolvingAgainstBaseURL: true) else { return nil }
+    
+    if let queryItems = request.query?.compactMapValues({ $0 }).map({ URLQueryItem(name: $0, value: $1) }),
+       !queryItems.isEmpty {
+      urlComponents.queryItems = queryItems
+    }
+    
+    guard let url = urlComponents.url else { return nil }
+    
+    self.url = url
   }
   
 }
+

@@ -8,10 +8,14 @@
 import Foundation
 
 extension Data {
-  var prettyJson: String {
-    guard let object = try? JSONSerialization.jsonObject(with: self, options: [.mutableLeaves]),
-          let data = try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .withoutEscapingSlashes]),
-          let prettyPrintedString = String(data: data, encoding:.utf8) else { return "Pretty JSON Error" }
-    return prettyPrintedString
+  var asJSON: String {
+    guard
+      let object = try? JSONSerialization.jsonObject(with: self, options: [.mutableLeaves]),
+      let data = try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .withoutEscapingSlashes]),
+      let jsonString = String(data: data, encoding: .utf8)
+      else {
+        return String(decoding: self, as: UTF8.self)
+    }
+    return jsonString
   }
 }
