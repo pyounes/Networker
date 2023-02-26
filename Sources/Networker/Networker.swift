@@ -1,33 +1,62 @@
 import Foundation
 
+public enum NWNetworkerType {
+  case `default`
+  case simple
+}
+
 public final class Networker: HTTPClient {
   
   private let networkConfigurations: NWSessionConfiguration
-  private let logger: NWLogger
-  private let activityIndicator: NWActivityIndicator
-  private let monitor: NWMonitor
+  private let logger: NWLogger?
+  private let activityIndicator: NWActivityIndicator?
+  private let monitor: NWMonitor?
   
   public init(
-            networkConfiguration: NWSessionConfiguration,
+    networkConfiguration: NWSessionConfiguration,
     logger: NWLogger,
     activityIndicator: NWActivityIndicator,
     monitor: NWMonitor
   ) {
     self.networkConfigurations = networkConfiguration
     self.logger = logger
-    self.activityIndicator = MainQueueDispatchDecorator(decoratee: activityIndicator)
+    self.activityIndicator = activityIndicator
     self.monitor = monitor
-    
-    monitor.startMonitoring()
+  }
+  
+  public init(
+    logger: NWLogger,
+    activityIndicator: NWActivityIndicator,
+    monitor: NWMonitor
+  ) {
+    self.networkConfigurations = NWNDefaultSessionConfiguration()
+    self.logger = logger
+    self.activityIndicator = activityIndicator
+    self.monitor = monitor
+  }
+  
+  public init(
+    activityIndicator: NWActivityIndicator,
+    monitor: NWMonitor
+  ) {
+    self.networkConfigurations = NWNDefaultSessionConfiguration()
+    self.logger = NWDefaultLogger()
+    self.activityIndicator = activityIndicator
+    self.monitor = monitor
   }
   
   public init() {
     self.networkConfigurations = NWNDefaultSessionConfiguration()
     self.logger = NWDefaultLogger()
-    self.activityIndicator = MainQueueDispatchDecorator(decoratee: NWDefaultActivityIndicator())
-    self.monitor = NWDefaultNetworkMonitor()
-    
-    monitor.startMonitoring()
+    self.activityIndicator = nil
+    self.monitor = nil
+  }
+  
+  public init(type: NWNetworkerType) {
+    self.networkConfigurations = NWNDefaultSessionConfiguration()
+    self.logger = type == .default ? NWDefaultLogger() : nil
+    self.activityIndicator = nil
+    self.monitor = type == .default ? NWDefaultNetworkMonitor() : nil
   }
   
   /// Generic Api Call
@@ -43,34 +72,41 @@ public final class Networker: HTTPClient {
     response: Response.Type,
     withLoader: Bool = false,
     completion: @escaping (Result<Response, Error>) -> Void
-  ) -> HTTPClientTask {
+  ) -> HTTPClientTask? {
     
-    let nwRequest = NWRequestBuilder(request: request)
+    guard
+      let nwRequest = NWRequestBuilder(request: request)
+    else {
+      DispatchQueue.main.async {
+        completion(.failure(NWError.invalidURL))
+      }
+      return nil
+    }
     
     if withLoader {
-      activityIndicator.addLoader()
+      activityIndicator?.addLoader()
     }
     
     // Staring Session Execution
     let task = networkConfigurations.session.dataTask(with: nwRequest.urlRequest) { data, urlResponse, error in
       
-      self.handleDataTaskResponse(request: nwRequest, response: response, urlResponse: urlResponse, data: data, error: error) { result in
+      self.handleDataTaskResponse(request: nwRequest,
+                                  response: response,
+                                  urlResponse: urlResponse,
+                                  data: data,
+                                  error: error)
+      { result in
         
-          if Thread.isMainThread {
-              completion(result)
-          } else {
-              DispatchQueue.main.async {
-                  completion(result)
-              }
-          }
-        
-        if withLoader {
-          self.activityIndicator.removeLoader()
+        DispatchQueue.main.async {
+          completion(result)
         }
         
+        if withLoader {
+          self.activityIndicator?.removeLoader()
+        }
       }
+      
     }
-    
     task.resume()
     return URLSessionTaskWrapper(wrapped: task)
   }
@@ -87,66 +123,68 @@ public final class Networker: HTTPClient {
   ) {
     
     if let url = request.urlRequest.url?.absoluteString {
-      logger.log(title: "URL", url)
+      logger?.log(title: "URL", url)
     }
     
     if let headers = request.urlRequest.allHTTPHeaderFields?.description {
-      logger.log(title: "HEADERS",  headers)
+      logger?.log(title: "HEADERS",  headers)
     }
     
     if let body = request.urlRequest.httpBody {
-      logger.log(title: "BODY", body.prettyJson)
+      logger?.log(title: "BODY", body.asJSON)
     }
     
     do {
       
       if let error = error {
-        if monitor.isConnected {
-          throw error
+        if let monitor = monitor {
+          if monitor.isConnected {
+            throw error
+          } else {
+            throw NWError.noInternet
+          }
         } else {
-          throw NWCustomError.noInternet
+          throw error
         }
       }
       
       guard
-        let httpURLResponse = urlResponse as? HTTPURLResponse
-      else {
-        throw NWCustomError.invalidResponse
-      }
-      
-      guard
-        request.nwRequest.acceptableStatusCodes.contains(httpURLResponse.statusCode)
-      else {
-        throw NWCustomError.unacceptableStatusCode(httpURLResponse.statusCode)
+        let httpURLResponse = urlResponse as? HTTPURLResponse else {
+        throw NWError.invalidResponse
       }
       
       // STATUS CODE
-      logger.log(title: "STATUS-CODE", httpURLResponse.statusCode.description)
+      logger?.log(title: "STATUS-CODE", httpURLResponse.statusCode.description)
       
       guard
-        let data = data
+        let data = data,
+        !data.isEmpty
       else {
-        throw NWCustomError.emptyData
+        throw NWError.emptyData
       }
       
       // Printing JSON
-      logger.log(title: "RESPONSE", data.prettyJson)
+      logger?.log(title: "RESPONSE", data.asJSON)
+      
+      guard request.nwRequest.acceptableStatusCodes.contains(httpURLResponse.statusCode) else {
+        throw NWError.unacceptableStatusCode(httpURLResponse.statusCode)
+      }
       
       try handleRawData(data: data) { result in
         completion(result)
       }
       
-    } catch let nwCustomError as NWCustomError {
+    } catch let nwError as NWError {
       // Internet Unavailable
-      logger.log(title: "NW-CUSTOM-ERROR", nwCustomError.localizedDescription)
-      completion(.failure(nwCustomError))
+      logger?.log(title: "NW-ERROR", nwError.errorDescription!)
+      completion(.failure(nwError))
     } catch let decodingError as DecodingError {
       // Decoding Error
-      logger.log(title: "NW-ERROR-DECODING", decodingError.debugDescription)
+      logger?.log(title: "NW-DECODING-ERROR", decodingError.debugDescription)
       completion(.failure(decodingError))
     } catch {
       // Unknown Error
-      logger.log(title: "NW-ERROR-RESPONSE", error.localizedDescription)
+      logger?.log(title: "NW-RESPONSE-ERROR", error.localizedDescription)
       completion(.failure(error))
     }
   }
@@ -166,11 +204,7 @@ public final class Networker: HTTPClient {
       }
     }
   }
-  
-  // MARK: - Deinit
-  deinit {
-    monitor.stopMonitoring()
-  }
+
 }
 
 
@@ -187,3 +221,4 @@ private extension Networker {
   }
   
 }
+
