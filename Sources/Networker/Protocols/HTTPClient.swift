@@ -22,5 +22,5 @@ public protocol HTTPClient {
     response: Response.Type,
     withLoader: Bool,
     completion: @escaping (Swift.Result<Response, Error>) -> Void
-  ) -> HTTPClientTask
+  ) -> HTTPClientTask?
 }
