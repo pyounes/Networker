@@ -7,30 +7,37 @@
 
 import Foundation
 
-public protocol NWRequest {
-  
+public protocol NWMainBaseRequest {
   /// Acceptable Status Codes
   var acceptableStatusCodes : [Int]                   { get }
-  
+  var defaultHeaders        : [String: String]?       { get }
   var baseURL               : URL                     { get }
+  var token                 : String                  { get }
+}
+
+public extension NWMainBaseRequest {
+  var acceptableStatusCodes: [Int] { [200] }
+  var defaultHeaders: [String: String]? { nil }
+  var token: String { "Undefined token computed property in NWRequest" }
+}
+
+public protocol NWRequest: NWMainBaseRequest {
+  
   var path                  : String                  { get }
   var headers               : [String: String]?       { get }
   var httpMethod            : NWMethod                { get }
   var query                 : [String: String?]?      { get }
   var parameters            : [String: Any]?          { get }
   var withToken             : Bool                    { get }
-  var token                 : String                  { get }
   
 }
 
 // MARK: - Default Implementation
 
 public extension NWRequest {
-  var acceptableStatusCodes: [Int] { Array(200...299) }
   var headers: [String: String]? { nil }
-  var httpMethod: NWMethod { NWMethod.get }
+  var httpMethod: NWMethod { .get }
   var query: [String: String?]? { nil }
   var parameters: [String: Any]? { nil }
-  var withToken: Bool { false }
-  var token: String { "Undefined token computed property in NWRequest" }
+  var withToken: Bool { true }
 }
