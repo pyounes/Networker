@@ -175,7 +175,6 @@ public final class Networker: HTTPClient {
       }
       
     } catch let nwError as NWError {
-      // Internet Unavailable
       logger?.log(title: "NW-ERROR", nwError.errorDescription!)
       completion(.failure(nwError))
     } catch let decodingError as DecodingError {
