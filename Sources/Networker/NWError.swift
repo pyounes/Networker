@@ -26,7 +26,7 @@ extension NWError: LocalizedError {
     case .invalidResponse:
       return "Request did not return HttpURLResponse"
     case let .unacceptableStatusCode(receivedCode):
-      return "Unacceptable StatusCode received \(receivedCode.description), Check acceptableStatusCodes property in NWRequest"
+      return "Unacceptable StatusCode received \"\(receivedCode.description)\", Check acceptableStatusCodes property in NWRequest"
     case .emptyData:
       return "Empty Data"
     }
